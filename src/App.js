@@ -1,4 +1,3 @@
-
 import './App.css';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
@@ -18,8 +17,11 @@ import TextField from '@mui/material/TextField';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
-
-
+import FacebookIcon from '@mui/icons-material/Facebook';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import GoogleIcon from '@mui/icons-material/Google';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import PinterestIcon from '@mui/icons-material/Pinterest';
 
 
 export default function App() {
@@ -126,13 +128,18 @@ const [querys, setQuerys] = useState(INITIAL_QUERY);
               inputProps={{ 'aria-label': 'search' }}
             />
           </Search>
-       <Button varient="text" color="inherit" style={{marginLeft:"auto"}} onClick={()=>setMode(mode==="light"? "dark":"light")}> {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />} {mode==="light"? "Dark":"Light"}Mode</Button>
+          <Button varient="text" color="inherit" style={{marginLeft:"auto"}} onClick={()=>history.push("/login")}>log in</Button>
+       <Button varient="text" color="inherit" style={{marginLeft:"0px" ,marginRight: "0px"}} onClick={()=>setMode(mode==="light"? "dark":"light")}> {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />} {mode==="light"? "Dark":"Light"}Mode</Button>
        </Toolbar>
        </AppBar>
 
        <Switch>
       <Route exact path="/">
           <StackOverFlow querys={querys}/>
+        </Route>
+
+        <Route path="/login">
+          <LoginPage />
         </Route>
 
         <Route path="/askquestion/edit/:id">
@@ -155,7 +162,30 @@ const [querys, setQuerys] = useState(INITIAL_QUERY);
   );
 }
 
-
+function LoginPage(){
+  return(
+    <div className="login-page">
+     <h1 className="login-head">Login</h1>
+     <h4 className="please">Please enter your username and Password</h4>
+     <TextField id="outlined-basic" label="userName" variant="outlined" />
+     <TextField
+          id="outlined-password-input"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+        />
+        <Button variant="outlined">log in</Button>
+        <h4 className="please">or sign up using</h4>
+     <div className="icons">
+          <FacebookIcon/>
+          <TwitterIcon/>
+          <GoogleIcon/>
+          <LinkedInIcon/>
+          <PinterestIcon/>
+     </div>
+    </div>
+  );
+}
 
 function StackOverFlow({querys}){
   const history = useHistory();
@@ -338,7 +368,10 @@ function GiveAnswer({querys, setQuerys}){
       onChange={(event)=>setTag3(event.target.value)}  label="enter tag" variant="outlined" />
 
       </div>
+      <div className="saveanswer-button">
       <Button onClick={editAnswer} variant="contained">SaveAnswer</Button>
+      </div>
+     
     </div>
   );
 }
