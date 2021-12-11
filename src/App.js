@@ -7,7 +7,7 @@ import Button from '@mui/material/Button';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useHistory } from "react-router-dom";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
 import { styled, alpha } from '@mui/material/styles';
@@ -23,6 +23,8 @@ import GoogleIcon from '@mui/icons-material/Google';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import PinterestIcon from '@mui/icons-material/Pinterest';
 
+
+const API_URL = "https://stackoverflow-node-app.herokuapp.com";
 
 export default function App() {
   const Search = styled('div')(({ theme }) => ({
@@ -74,43 +76,50 @@ const darkTheme = createTheme({
   },
 });
 
-const INITIAL_QUERY =[{
-       qn:"Batch create scripts with line updated in each one based on a list",
-       tag1:"html",
-       tag2:"css",
-       tag3:"javascript",
-       answers:"I am looking to generate multiple script files with a line to a file path in each updated based on a list of file paths, with a new copy of the file generated once the file path is updated.For example, the below line (LOC_PATH) in each new script file needs to be the next in the list, which I have as a list in excel currently."
-},
-{
-  qn:"How can I alter this computed column in SQL Server 2008?",
-  tag1:"sql",
-  tag2:"tsql",
-  tag3:"sql-server",
-  answers:"I have a computed column created with the following line: alter table tbPedidos add restricoes as (cast(case when restricaoLicenca = 1 or restricaoLote = 1 then 1 else 0 end as bit))"
-},
-{
-  qn:"Skipping random lines when using pandas read_table",
-  tag1:"python",
-  tag2:"python-3x",
-  tag3:"pandas",
-  answers:"The pandas read_table() function enables us to read *.tab file and the parameter skiprow provides flexible ways to retrieve the data. However, I'm in trouble when I need to read *.tab file in a loop but the number of the rows need to skip is random. For example, the contents need to skip are started with /* and ended with */ , such as:/*... The number of rows need to skip is random...*/"
-},
-{
-  qn:"how configure maven plugin repository",
-  tag1:"maven",
-  tag2:"plugin",
-  tag3:"repository",
-  answers:"I'm developing new Java project depending on third party library using maven 3.8.4 as build tool. I would add that library to my local maven repository with install:install-file option. When I execute the command, I get the error"
-},
-{
-  qn:"WPF DataGridComboBox dynamic dropdown",
-  tag1:"WPF",
-  tag2:"DataGrid",
-  tag3:"dynamic",
-  answers:"Within a more complex DataGrid, I have a DataGridComboBoxColumn, a section of the XAML is: <DataGridComboBoxColumn x:Name=PrimaryProcessColumn"
-}
-]
-const [querys, setQuerys] = useState(INITIAL_QUERY);
+// const INITIAL_QUERY =[{
+//        qn:"Batch create scripts with line updated in each one based on a list",
+//        tag1:"html",
+//        tag2:"css",
+//        tag3:"javascript",
+//        answers:"I am looking to generate multiple script files with a line to a file path in each updated based on a list of file paths, with a new copy of the file generated once the file path is updated.For example, the below line (LOC_PATH) in each new script file needs to be the next in the list, which I have as a list in excel currently."
+// },
+// {
+//   qn:"How can I alter this computed column in SQL Server 2008?",
+//   tag1:"sql",
+//   tag2:"tsql",
+//   tag3:"sql-server",
+//   answers:"I have a computed column created with the following line: alter table tbPedidos add restricoes as (cast(case when restricaoLicenca = 1 or restricaoLote = 1 then 1 else 0 end as bit))"
+// },
+// {
+//   qn:"Skipping random lines when using pandas read_table",
+//   tag1:"python",
+//   tag2:"python-3x",
+//   tag3:"pandas",
+//   answers:"The pandas read_table() function enables us to read *.tab file and the parameter skiprow provides flexible ways to retrieve the data. However, I'm in trouble when I need to read *.tab file in a loop but the number of the rows need to skip is random. For example, the contents need to skip are started with /* and ended with */ , such as:/*... The number of rows need to skip is random...*/"
+// },
+// {
+//   qn:"how configure maven plugin repository",
+//   tag1:"maven",
+//   tag2:"plugin",
+//   tag3:"repository",
+//   answers:"I'm developing new Java project depending on third party library using maven 3.8.4 as build tool. I would add that library to my local maven repository with install:install-file option. When I execute the command, I get the error"
+// },
+// {
+//   qn:"WPF DataGridComboBox dynamic dropdown",
+//   tag1:"WPF",
+//   tag2:"DataGrid",
+//   tag3:"dynamic",
+//   answers:"Within a more complex DataGrid, I have a DataGridComboBoxColumn, a section of the XAML is: <DataGridComboBoxColumn x:Name=PrimaryProcessColumn"
+// }
+// ]
+const [querys, setQuerys] = useState([]);
+console.log(querys);
+
+useEffect(()=>{
+  fetch(`${API_URL}/stackoverflow`, {method:"GET"})
+  .then((data)=>data.json())
+  .then((mvs)=>setQuerys(mvs));
+}, []);
   return (
     <ThemeProvider theme={darkTheme}>
       <Paper elevation={3} style={{borderRadius:"0px",minHeight:"100vh"}}>
@@ -135,7 +144,7 @@ const [querys, setQuerys] = useState(INITIAL_QUERY);
 
        <Switch>
       <Route exact path="/">
-          <StackOverFlow querys={querys}/>
+          <QueryList />
         </Route>
 
         <Route path="/login">
@@ -143,15 +152,15 @@ const [querys, setQuerys] = useState(INITIAL_QUERY);
         </Route>
 
         <Route path="/askquestion/edit/:id">
-          <GiveAnswer querys={querys} setQuerys={setQuerys}/>
+          <GiveAnswer />
         </Route>
 
         <Route path="/askquestion/:id">
-          <AnswerPage querys={querys}/>
+          <AnswerPage />
         </Route>
 
         <Route path="/askquestion">
-          <AskQuestion querys={querys} setQuerys={setQuerys}/>
+          <AskQuestion />
         </Route>
 
         </Switch>
@@ -187,33 +196,34 @@ function LoginPage(){
   );
 }
 
-function StackOverFlow({querys}){
+function AskQuestion(){
   const history = useHistory();
-  return (
-    <div>
-    <div className="home">
-      <h2 className="">Top Questions</h2>
-      <Button variant="outlined" color="inherit" onClick={()=>history.push("/askquestion")}>Ask Questions</Button>
-    </div>
-    <QueryList querys={querys}/>
-   
-    </div>
-  );
-}
 
-function AskQuestion({querys, setQuerys}){
-  const history = useHistory();
   const [qn, setQn] = useState("");
   const [tag1, setTag1] = useState("");
   const [tag2, setTag2] = useState("");
   const [tag3, setTag3] = useState("");
   const [answers, setAnswers] = useState("");
   
+  
+// const addQn =()=>{
+//   const newques= {qn, tag1, tag2, tag3,answers};
+//   setQuerys([...querys,newques]);
+//   history.push("/");
+// };
+
 const addQn =()=>{
   const newques= {qn, tag1, tag2, tag3,answers};
-  setQuerys([...querys,newques]);
-  history.push("/");
-};
+  console.log(newques)
+  
+  fetch(`${API_URL}/stackoverflow`, {
+      method:"POST",
+      body: JSON.stringify(newques),
+      headers: {'Content-Type': 'application/json'},
+  }).then(()=>history.push("/"));
+    
+  };
+
   return(
 <div >
   <h2 className="head-qn">Ask a public question</h2>
@@ -249,16 +259,28 @@ const addQn =()=>{
   );
 }
 
-function QueryList({querys}){
+function QueryList(){
   const history = useHistory();
+  const [querys, setQuerys] = useState([]);
+console.log(querys);
+
+useEffect(()=>{
+  fetch(`${API_URL}/stackoverflow`, {method:"GET"})
+  .then((data)=>data.json())
+  .then((mvs)=>setQuerys(mvs));
+}, []);
   return(
     <section>
-         {querys.map(({qn, tag1, tag2, tag3},index)=>(
-       <QuestionPage qn={qn} tag1={tag1} tag2={tag2} tag3={tag3} id={index}
+      <div className="home">
+      <h2 className="">Top Questions</h2>
+      <Button variant="outlined" color="inherit" onClick={()=>history.push("/askquestion")}>Ask Questions</Button>
+    </div>
+         {querys.map(({qn, tag1, tag2, tag3, id, _id},index)=>(
+       <QuestionPage key={_id} qn={qn} tag1={tag1} tag2={tag2} tag3={tag3} id={_id}
        editButton= {<IconButton 
         style={{marginLeft:"auto"}}
         aria-label="edit"  color="success"
-       onClick={()=>history.push("/askquestion/edit/" + index)}>
+       onClick={()=>history.push("/askquestion/edit/" + _id)}>
        <EditIcon />
      </IconButton>}
        />
@@ -306,11 +328,20 @@ function QuestionPage({qn, tag1, tag2, tag3, id, editButton}){
   );
 }
 
-function AnswerPage({querys}){
+function AnswerPage(){
   const history = useHistory();
   const {id} = useParams();
-  const qndet = querys[id]; 
-  console.log(qndet);
+  // const qndet = querys[id]; 
+  // console.log(qndet);
+
+  const [qndet, setQndet] = useState({});
+
+useEffect(()=>{
+  fetch(`${API_URL}/stackoverflow/${id}`, {method:"GET"})
+  .then((data)=>data.json())
+  .then((mv)=>setQndet(mv));
+}, [id]);
+
   return(
     <div>
     <p className="para-qn-style">{qndet.qn}</p>
@@ -320,10 +351,19 @@ function AnswerPage({querys}){
   );
 }
 
-function GiveAnswer({querys, setQuerys}){
-  const history = useHistory();
+function GiveAnswer(){
   const {id} = useParams();
-  const qndet = querys[id]; 
+  const [qndet, setQndet] = useState(null);
+  useEffect(()=>{
+    fetch(`${API_URL}/stackoverflow/${id}`, {method:"GET"})
+    .then((data)=>data.json())
+    .then((mv)=>setQndet(mv));
+  }, [id]);
+   return qndet? <GiveAnswertoQuestion qndet={qndet}/>:"";
+ }
+
+function GiveAnswertoQuestion({qndet}){
+  const history = useHistory();
   const [qn, setQn] = useState(qndet.qn);
   const [tag1, setTag1] = useState(qndet.tag1);
   const [tag2, setTag2] = useState(qndet.tag2);
@@ -334,10 +374,16 @@ function GiveAnswer({querys, setQuerys}){
     
     const updatedAnswer= {qn, tag1, tag2, tag3, answers};
     console.log(updatedAnswer);
-    const copyAnswer =[...querys];
-    copyAnswer[id] = updatedAnswer;
-    setQuerys(copyAnswer);
-    history.push("/");
+    // const copyAnswer =[...querys];
+    // copyAnswer[id] = updatedAnswer;
+    // setQuerys(copyAnswer);
+    // history.push("/");
+
+    fetch(`${API_URL}/stackoverflow/${qndet._id}`, {
+      method:"PUT",
+      body: JSON.stringify(updatedAnswer),
+      headers: {'Content-Type': 'application/json'},
+  }).then(()=>history.push("/"))
   };
 
   return(
